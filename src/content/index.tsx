@@ -7,6 +7,8 @@ class InstagramSavedManager {
   private bulkModeEnabled: boolean = false;
   private selectedPosts: Set<string> = new Set();
   private observer: MutationObserver | null = null;
+  private processingOverlay: HTMLElement | null = null;
+  private mutedMedia: Array<{ element: HTMLMediaElement; muted: boolean; volume: number }> = [];
 
   constructor() {
     this.init();
@@ -283,35 +285,41 @@ class InstagramSavedManager {
 
   public async startUnsave() {
     console.log(`InstaBulk: Starting Bulk Unsave for ${this.selectedPosts.size} posts`);
+    this.showProcessingOverlay();
     this.broadcastStatus('processing', 0);
 
     const postIds = Array.from(this.selectedPosts);
     let completed = 0;
     let failed = 0;
 
-    for (const postId of postIds) {
-      if (!this.active || !this.isOnSavedPage()) {
-        console.log('InstaBulk: Stop condition met (inactive or wrong page)');
-        break;
-      }
+    try {
+      for (const postId of postIds) {
+        if (!this.active || !this.isOnSavedPage()) {
+          console.log('InstaBulk: Stop condition met (inactive or wrong page)');
+          break;
+        }
 
-      try {
-        const success = await this.unsaveSinglePost(postId);
-        if (success) {
-          completed++;
-          this.selectedPosts.delete(postId);
-          const checkbox = document.querySelector(`.instabulk-checkbox[data-post-id="${postId}"]`);
-          checkbox?.closest('.instabulk-checkbox-container')?.remove();
-        } else {
+        try {
+          const success = await this.unsaveSinglePost(postId);
+          if (success) {
+            completed++;
+            this.selectedPosts.delete(postId);
+            const checkbox = document.querySelector(`.instabulk-checkbox[data-post-id="${postId}"]`);
+            checkbox?.closest('.instabulk-checkbox-container')?.remove();
+          } else {
+            failed++;
+          }
+        } catch (err) {
+          console.error('InstaBulk: Error in loop', postId, err);
           failed++;
         }
-      } catch (err) {
-        console.error('InstaBulk: Error in loop', postId, err);
-        failed++;
-      }
 
-      this.broadcastStatus('processing', Math.round((completed / postIds.length) * 100));
-      await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+        this.broadcastStatus('processing', Math.round((completed / postIds.length) * 100));
+        this.updateProcessingOverlay(completed, postIds.length, failed);
+        await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+      }
+    } finally {
+      this.hideProcessingOverlay();
     }
 
     this.broadcastStatus('done', 100);
@@ -340,7 +348,12 @@ class InstagramSavedManager {
       }
 
       this.simulateClick(removeButton);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const unsaveCompleted = await this.waitForUnsaveCompletion(modal, removeButton);
+      if (!unsaveCompleted) {
+        await this.closeModal();
+        return false;
+      }
+
       await this.closeModal();
 
       return true;
@@ -374,10 +387,104 @@ class InstagramSavedManager {
     } catch (error) {}
   }
 
+  private async waitForUnsaveCompletion(
+    modal: HTMLElement,
+    originalRemoveButton: HTMLElement,
+    maxAttempts: number = 30
+  ): Promise<boolean> {
+    for (let i = 0; i < maxAttempts; i++) {
+      if (!modal.isConnected) {
+        return true;
+      }
+
+      const currentRemoveButton = modal.querySelector('svg[aria-label="Remove"], svg[aria-label="Unsave"]')
+        ?.closest('button, [role="button"]') as HTMLElement | null;
+
+      const buttonDetached = !originalRemoveButton.isConnected;
+      const buttonChanged = !!currentRemoveButton && currentRemoveButton !== originalRemoveButton;
+      const buttonGone = !currentRemoveButton;
+
+      if (buttonDetached || buttonChanged || buttonGone) {
+        return true;
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 150));
+    }
+
+    return false;
+  }
+
   private simulateClick(element: HTMLElement) {
     ['mousedown', 'mouseup', 'click'].forEach(type => {
       element.dispatchEvent(new MouseEvent(type, { view: window, bubbles: true, cancelable: true, buttons: 1 }));
     });
+  }
+
+  private showProcessingOverlay() {
+    this.mutePageMedia();
+
+    if (this.processingOverlay) {
+      this.processingOverlay.classList.add('visible');
+      this.updateProcessingOverlay(0, this.selectedPosts.size, 0);
+      return;
+    }
+
+    const overlay = document.createElement('div');
+    overlay.className = 'instabulk-processing-overlay visible';
+    overlay.innerHTML = `
+      <div class="instabulk-processing-card">
+        <div class="instabulk-processing-spinner"></div>
+        <div class="instabulk-processing-title">Unsave in progress</div>
+        <div class="instabulk-processing-subtitle">
+          Instagram dialogs are being handled behind this screen.
+        </div>
+        <div class="instabulk-processing-counter">Starting...</div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    this.processingOverlay = overlay;
+    this.updateProcessingOverlay(0, this.selectedPosts.size, 0);
+  }
+
+  private updateProcessingOverlay(completed: number, total: number, failed: number) {
+    const counter = this.processingOverlay?.querySelector('.instabulk-processing-counter');
+    if (!counter) return;
+
+    const remaining = Math.max(total - completed - failed, 0);
+    counter.textContent = `${completed} completed - ${failed} failed - ${remaining} remaining`;
+  }
+
+  private hideProcessingOverlay() {
+    if (!this.processingOverlay) return;
+    this.processingOverlay.remove();
+    this.processingOverlay = null;
+    this.restorePageMedia();
+  }
+
+  private mutePageMedia() {
+    this.mutedMedia = [];
+
+    document.querySelectorAll('video, audio').forEach((node) => {
+      const element = node as HTMLMediaElement;
+      this.mutedMedia.push({
+        element,
+        muted: element.muted,
+        volume: element.volume,
+      });
+
+      element.muted = true;
+      element.volume = 0;
+    });
+  }
+
+  private restorePageMedia() {
+    this.mutedMedia.forEach(({ element, muted, volume }) => {
+      element.muted = muted;
+      element.volume = volume;
+    });
+
+    this.mutedMedia = [];
   }
 
   private broadcastStatus(status: 'idle' | 'processing' | 'done', progress: number) {
