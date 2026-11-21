@@ -12,6 +12,6 @@
  */
 
 export function isSavedPage(pathname: string): boolean {
-  const trimmed = pathname.toLowerCase().replace(/\/+$/, '');
-  return trimmed.endsWith('/saved');
+  const segments = pathname.toLowerCase().split('/');
+  return segments.some((segment) => segment === 'saved');
 }

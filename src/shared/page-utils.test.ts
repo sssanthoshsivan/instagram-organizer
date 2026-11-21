@@ -15,13 +15,17 @@ describe('isSavedPage()', () => {
     expect(isSavedPage('/saved/')).toBe(true);
   });
 
-  it('accepts the default saved location for all IG layouts', () => {
-    expect(isSavedPage('/reels/saved/')).toBe(true);
-    expect(isSavedPage('/reels/saved')).toBe(true);
-    expect(isSavedPage('/reels/USERNAME/saved/')).toBe(true);
-    expect(isSavedPage('/reels/USERNAME/saved')).toBe(true);
-    expect(isSavedPage('/u/USERNAME/saved/')).toBe(true);
-    expect(isSavedPage('/u/USERNAME/saved')).toBe(true);
+  it('accepts the newer all-posts saved URL', () => {
+    expect(isSavedPage('/saved/all-posts')).toBe(true);
+    expect(isSavedPage('/saved/all-posts/')).toBe(true);
+    expect(isSavedPage('/username/saved/all-posts')).toBe(true);
+    expect(isSavedPage('/username/saved/all-posts/')).toBe(true);
+  });
+
+  it('rejects strings that merely contain "saved" as a substring', () => {
+    expect(isSavedPage('/saved-by')).toBe(false);
+    expect(isSavedPage('/unsaved')).toBe(false);
+    expect(isSavedPage('/some-saved-posts')).toBe(false);
   });
 
   it('is case-insensitive', () => {
