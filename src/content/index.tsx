@@ -52,7 +52,7 @@ class InstagramSavedManager {
   }
 
   private getTotalSavedCount(): number {
-    if (!this.isOnSavedPage() || !this.active) return 0;
+    if (!this.isOnSavedPage()) return 0;
 
     const mainContent = document.querySelector('main');
     if (!mainContent) return 0;
@@ -395,7 +395,7 @@ class InstagramSavedManager {
       await this.closeModal();
 
       return true;
-    } catch (error) {
+    } catch {
       await this.closeModal();
       return false;
     }
@@ -422,7 +422,9 @@ class InstagramSavedManager {
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       }
       await new Promise(resolve => setTimeout(resolve, 800));
-    } catch (error) {}
+    } catch { // modal close failure is non-critical; ignore
+    }
+
   }
 
   private async waitForUnsaveCompletion(

@@ -13,20 +13,20 @@ const BulkManagerUI: React.FC<Props> = ({ selectedCount: initialCount, onClear, 
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const handleSelectionChange = (e: any) => {
+    const handleSelectionChange = (e: CustomEvent<{ count: number }>) => {
       setCount(e.detail.count);
     };
 
-    const handleStatusUpdate = (e: any) => {
+    const handleStatusUpdate = (e: CustomEvent<{ status: 'idle' | 'processing' | 'done'; progress: number }>) => {
       setStatus(e.detail.status);
       setProgress(e.detail.progress);
     };
 
-    window.addEventListener('instabulk-selection-changed', handleSelectionChange);
-    window.addEventListener('instabulk-status-update', handleStatusUpdate);
+    window.addEventListener('instabulk-selection-changed', handleSelectionChange as EventListener);
+    window.addEventListener('instabulk-status-update', handleStatusUpdate as EventListener);
     return () => {
-      window.removeEventListener('instabulk-selection-changed', handleSelectionChange);
-      window.removeEventListener('instabulk-status-update', handleStatusUpdate);
+      window.removeEventListener('instabulk-selection-changed', handleSelectionChange as EventListener);
+      window.removeEventListener('instabulk-status-update', handleStatusUpdate as EventListener);
     };
   }, []);
 
