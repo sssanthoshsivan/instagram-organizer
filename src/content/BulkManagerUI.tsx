@@ -4,9 +4,10 @@ import './BulkManagerUI.css';
 interface Props {
   selectedCount: number;
   onClear: () => void;
+  onMoveToCollection: () => void;
 }
 
-const BulkManagerUI: React.FC<Props> = ({ selectedCount: initialCount, onClear }) => {
+const BulkManagerUI: React.FC<Props> = ({ selectedCount: initialCount, onClear, onMoveToCollection }) => {
   const [count, setCount] = useState(initialCount);
   const [status, setStatus] = useState<'idle' | 'processing' | 'done'>('idle');
   const [progress, setProgress] = useState(0);
@@ -58,7 +59,7 @@ const BulkManagerUI: React.FC<Props> = ({ selectedCount: initialCount, onClear }
           <div className="action-buttons">
             <button className="toolbar-btn secondary" onClick={onClear}>Deselect All</button>
             <button className="toolbar-btn primary" onClick={handleUnsave}>Unsave Selected</button>
-            <button className="toolbar-btn accent">Move to Collection</button>
+            <button className="toolbar-btn accent" onClick={onMoveToCollection}>Move to Collection</button>
           </div>
         )}
       </div>

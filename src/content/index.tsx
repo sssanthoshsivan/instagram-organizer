@@ -22,10 +22,13 @@ class InstagramSavedManager {
       console.log('InstaBulk: Not on saved page, extension inactive');
     }
     
-    chrome.runtime.onMessage.addListener((message) => {
+    chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
       if (message.type === 'TOGGLE_BULK_MODE') {
         this.bulkModeEnabled = !!message.active;
         this.setBulkMode(message.active);
+      }
+      if (message.type === 'GET_TOTAL_SAVED_COUNT') {
+        sendResponse({ totalSaved: this.getTotalSavedCount() });
       }
     });
 
@@ -45,9 +48,21 @@ class InstagramSavedManager {
 
   private isOnSavedPage(): boolean {
     const pathname = window.location.pathname.toLowerCase();
-    // More robust regex: matches /any_user/saved/, /reels/saved/, /saved/ etc.
-    // Accounts for various trailing slash scenarios
-    return /\/saved(\/|$)/.test(pathname);
+    // A saved page is any route whose final segment is 'saved' (after stripping
+    // trailing slashes). Covers /saved/, /saved, /reels/saved/, /reels/USERNAME/saved/,
+    // /u/USERNAME/saved/, etc.
+    const trimmed = pathname.replace(/\/+$/, '');
+    return trimmed.endsWith('/saved');
+  }
+
+  private getTotalSavedCount(): number {
+    if (!this.isOnSavedPage() || !this.active) return 0;
+
+    const mainContent = document.querySelector('main');
+    if (!mainContent) return 0;
+
+    const postLinks = mainContent.querySelectorAll('a[href*="/p/"], a[href*="/reels/"], a[href*="/reel/"]');
+    return postLinks.length;
   }
 
   private watchForNavigation() {
@@ -168,7 +183,11 @@ class InstagramSavedManager {
 
     ReactDOM.createRoot(root).render(
       <React.StrictMode>
-        <BulkManagerUI selectedCount={this.selectedPosts.size} onClear={() => this.clearSelection()} />
+        <BulkManagerUI
+          selectedCount={this.selectedPosts.size}
+          onClear={() => this.clearSelection()}
+          onMoveToCollection={() => this.showNotification('Move to Collection is not available yet — it is on our roadmap.')}
+        />
       </React.StrictMode>
     );
   }

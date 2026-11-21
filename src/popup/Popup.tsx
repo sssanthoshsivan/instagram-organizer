@@ -4,20 +4,29 @@ import './Popup.css';
 const Popup = () => {
   const [isInstagramSavedPage, setIsInstagramSavedPage] = useState(false);
   const [isBulkMode, setIsBulkMode] = useState(false);
+  const [totalSaved, setTotalSaved] = useState('...');
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const activeTab = tabs[0];
-      if (activeTab?.url?.includes('instagram.com') && activeTab.url.includes('/saved/')) {
-        setIsInstagramSavedPage(true);
-      }
-    });
+      const isSaved = !!(activeTab?.url?.includes('instagram.com') && activeTab.url.includes('/saved/'));
 
-    chrome.storage.local.get(['bulkMode'], (result) => {
-      setIsBulkMode(!!result.bulkMode);
+      setIsInstagramSavedPage(isSaved);
+
+      if (isSaved && activeTab?.id) {
+        chrome.tabs.sendMessage(activeTab.id, { type: 'GET_TOTAL_SAVED_COUNT' }, (response) => {
+          if (chrome.runtime.lastError) return;
+          if (response?.totalSaved !== undefined) {
+            setTotalSaved(String(response.totalSaved));
+          }
+        });
+      }
+
+      chrome.storage.local.get(['bulkMode'], (result) => {
+        setIsBulkMode(!!result.bulkMode);
+      });
     });
   }, []);
-
   const toggleBulkMode = () => {
     const newValue = !isBulkMode;
     setIsBulkMode(newValue);
@@ -83,7 +92,7 @@ const Popup = () => {
             <div className="glass-card stats-card">
               <div className="stat-item">
                 <span className="label">Total Saved</span>
-                <span className="value">...</span>
+                <span className="value">{totalSaved}</span>
               </div>
               <div className="stat-item">
                 <span className="label">Selected</span>
