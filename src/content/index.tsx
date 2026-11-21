@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import BulkManagerUI from './BulkManagerUI.tsx';
+import { isSavedPage } from '../shared/page-utils.ts';
 
 class InstagramSavedManager {
   private active: boolean = false;
@@ -47,12 +48,7 @@ class InstagramSavedManager {
   }
 
   private isOnSavedPage(): boolean {
-    const pathname = window.location.pathname.toLowerCase();
-    // A saved page is any route whose final segment is 'saved' (after stripping
-    // trailing slashes). Covers /saved/, /saved, /reels/saved/, /reels/USERNAME/saved/,
-    // /u/USERNAME/saved/, etc.
-    const trimmed = pathname.replace(/\/+$/, '');
-    return trimmed.endsWith('/saved');
+    return isSavedPage(window.location.pathname);
   }
 
   private getTotalSavedCount(): number {
