@@ -29,9 +29,12 @@ class InstagramSavedManager {
       }
     });
 
-    chrome.storage.local.get(['bulkMode'], (result) => {
+    chrome.storage.local.get(['bulkMode', 'selectedPosts'], (result) => {
       this.bulkModeEnabled = !!result.bulkMode;
-      if (result.bulkMode) {
+      if (result.selectedPosts) {
+        this.selectedPosts = new Set(result.selectedPosts as string[]);
+      }
+      if (this.bulkModeEnabled) {
         this.setBulkMode(true);
       }
     });
@@ -93,6 +96,7 @@ class InstagramSavedManager {
     if (this.active === active) {
       if (active) {
         this.scanAndInjectCheckboxes();
+        this.restoreSelection();
       }
       return;
     }
@@ -141,6 +145,7 @@ class InstagramSavedManager {
     document.body.classList.add('instabulk-active');
     this.injectUI();
     this.scanAndInjectCheckboxes();
+    this.restoreSelection();
     this.startObserver();
   }
 
@@ -148,6 +153,7 @@ class InstagramSavedManager {
     console.log('InstaBulk: Disabling Bulk Mode');
     document.body.classList.remove('instabulk-active');
     this.selectedPosts.clear();
+    this.persistSelection();
     this.removeCheckboxes();
     this.stopObserver();
     this.removeUI();
@@ -217,6 +223,7 @@ class InstagramSavedManager {
           this.selectedPosts.delete(postId);
         }
         this.updateUI();
+        this.persistSelection();
       });
 
       // Prevent triggering the post popup when clicking the checkbox area
@@ -275,12 +282,27 @@ class InstagramSavedManager {
     }
   }
 
+  private persistSelection() {
+    chrome.storage.local.set({ selectedPosts: Array.from(this.selectedPosts) });
+  }
+
+  private restoreSelection() {
+    document.querySelectorAll('.instabulk-checkbox').forEach((cb) => {
+      const input = cb as HTMLInputElement;
+      const postId = input.getAttribute('data-post-id') || '';
+      if (this.selectedPosts.has(postId)) {
+        input.checked = true;
+      }
+    });
+  }
+
   private clearSelection() {
     this.selectedPosts.clear();
     document.querySelectorAll('.instabulk-checkbox').forEach(cb => {
       (cb as HTMLInputElement).checked = false;
     });
     this.updateUI();
+    this.persistSelection();
   }
 
   public async startUnsave() {
@@ -304,6 +326,7 @@ class InstagramSavedManager {
           if (success) {
             completed++;
             this.selectedPosts.delete(postId);
+            this.persistSelection();
             const checkbox = document.querySelector(`.instabulk-checkbox[data-post-id="${postId}"]`);
             checkbox?.closest('.instabulk-checkbox-container')?.remove();
           } else {
