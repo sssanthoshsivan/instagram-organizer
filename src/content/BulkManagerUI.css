@@ -280,7 +280,7 @@
   pointer-events: none !important;
 }
 
-/* Post Tile Checkbox Injection */
+/* Post Tile Selection Circle */
 .instabulk-checkbox-container {
   position: absolute !important;
   top: 10px !important;
@@ -293,30 +293,27 @@
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-}
-
-.instabulk-checkbox-native {
-  position: absolute !important;
-  opacity: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
+  box-sizing: border-box !important;
   margin: 0 !important;
   padding: 0 !important;
-  cursor: pointer !important;
-  z-index: 2 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
 }
 
 .instabulk-checkbox-circle {
-  width: 26px !important;
-  height: 26px !important;
-  min-width: 26px !important;
-  min-height: 26px !important;
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
   border-radius: 50% !important;
   background-color: rgba(12, 14, 18, 0.78) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   border: 2px solid #ffffff !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -326,23 +323,24 @@
 }
 
 .instabulk-checkbox-container:hover .instabulk-checkbox-circle {
-  transform: scale(1.08) !important;
+  transform: scale(1.1) !important;
   background-color: rgba(12, 14, 18, 0.95) !important;
+  border-color: #ffffff !important;
 }
 
 .instabulk-checkbox-circle.checked {
   background-color: #ff3355 !important;
   border-color: #ff3355 !important;
-  transform: scale(1.04) !important;
-  box-shadow: 0 2px 12px rgba(255, 51, 85, 0.55) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 2px 12px rgba(255, 51, 85, 0.6) !important;
 }
 
 .instabulk-check-svg {
-  width: 15px !important;
-  height: 15px !important;
+  width: 13px !important;
+  height: 13px !important;
   stroke: #ffffff !important;
   fill: none !important;
-  stroke-width: 3 !important;
+  stroke-width: 3.2 !important;
   stroke-linecap: round !important;
   stroke-linejoin: round !important;
   opacity: 0 !important;
@@ -353,55 +351,6 @@
 .instabulk-checkbox-circle.checked .instabulk-check-svg {
   opacity: 1 !important;
   transform: scale(1) !important;
-}
-
-.instabulk-checkbox {
-  appearance: none !important;
-  -webkit-appearance: none !important;
-  -moz-appearance: none !important;
-  width: 26px !important;
-  height: 26px !important;
-  min-width: 26px !important;
-  min-height: 26px !important;
-  border-radius: 50% !important;
-  background-color: rgba(12, 14, 18, 0.75) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
-  border: 2px solid #ffffff !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
-  position: relative !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-  outline: none !important;
-  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease !important;
-}
-
-.instabulk-checkbox:hover {
-  transform: scale(1.1) !important;
-  background-color: rgba(12, 14, 18, 0.95) !important;
-  border-color: #ffffff !important;
-}
-
-.instabulk-checkbox:checked {
-  background-color: #ff3355 !important;
-  border-color: #ff3355 !important;
-  transform: scale(1.05) !important;
-  box-shadow: 0 2px 12px rgba(255, 51, 85, 0.55) !important;
-}
-
-.instabulk-checkbox:checked::after {
-  content: '✓' !important;
-  color: #ffffff !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  line-height: 1 !important;
-  display: block !important;
-  text-align: center !important;
 }
 
 /* Selected Post Tile Visual Highlighting */

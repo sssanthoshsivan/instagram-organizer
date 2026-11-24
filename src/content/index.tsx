@@ -240,22 +240,21 @@ class InstagramSavedManager {
         return;
       }
 
-      // Ensure relative positioning on the container
+      // Ensure relative positioning on the thumbnail container
       const currentPos = window.getComputedStyle(container).position;
       if (currentPos === 'static') {
         container.style.position = 'relative';
       }
 
+      const isSelected = this.selectedPosts.has(postId);
+
       const checkboxContainer = document.createElement('div');
       checkboxContainer.className = 'instabulk-checkbox-container';
       checkboxContainer.setAttribute('data-post-id', postId);
-      
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.className = 'instabulk-checkbox instabulk-checkbox-native';
-      checkbox.setAttribute('data-post-id', postId);
-      const isSelected = this.selectedPosts.has(postId);
-      checkbox.checked = isSelected;
+      checkboxContainer.setAttribute('role', 'checkbox');
+      checkboxContainer.setAttribute('tabindex', '0');
+      checkboxContainer.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      checkboxContainer.setAttribute('title', isSelected ? 'Deselect post' : 'Select post');
 
       const visualCircle = document.createElement('div');
       visualCircle.className = `instabulk-checkbox-circle ${isSelected ? 'checked' : ''}`;
@@ -269,39 +268,61 @@ class InstagramSavedManager {
         container.classList.add('instabulk-post-selected');
       }
 
-      checkbox.addEventListener('change', (e) => {
-        const target = e.target as HTMLInputElement;
-        if (target.checked) {
-          this.selectedPosts.add(postId);
-          visualCircle.classList.add('checked');
-          container.classList.add('instabulk-post-selected');
-        } else {
-          this.selectedPosts.delete(postId);
-          visualCircle.classList.remove('checked');
-          container.classList.remove('instabulk-post-selected');
-        }
-        this.updateUI();
-        this.persistSelection();
+      // Direct selection toggle on click - prevent navigation to the Instagram post
+      checkboxContainer.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.togglePostSelection(postId, checkboxContainer, container);
       });
 
-      // Prevent triggering the post popup when clicking the checkbox area
-      checkboxContainer.addEventListener('click', (e) => e.stopPropagation());
-      checkboxContainer.addEventListener('mousedown', (e) => e.stopPropagation());
+      checkboxContainer.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
 
-      checkboxContainer.appendChild(checkbox);
+      checkboxContainer.addEventListener('mouseup', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      checkboxContainer.addEventListener('keydown', (e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          e.stopPropagation();
+          this.togglePostSelection(postId, checkboxContainer, container);
+        }
+      });
+
       checkboxContainer.appendChild(visualCircle);
       container.appendChild(checkboxContainer);
     });
   }
 
-  private findPostTileContainer(postLink: HTMLAnchorElement): HTMLElement {
-    const parent = postLink.parentElement;
-    if (parent && parent.tagName !== 'MAIN' && parent.tagName !== 'BODY') {
-      const siblingLinks = parent.querySelectorAll('a[href*="/p/"], a[href*="/reel/"], a[href*="/reels/"]');
-      if (siblingLinks.length <= 1) {
-        return parent;
-      }
+  private togglePostSelection(postId: string, checkboxContainer: HTMLElement, postTile: HTMLElement) {
+    const circle = checkboxContainer.querySelector('.instabulk-checkbox-circle');
+    const isNowSelected = !this.selectedPosts.has(postId);
+
+    if (isNowSelected) {
+      this.selectedPosts.add(postId);
+      circle?.classList.add('checked');
+      checkboxContainer.setAttribute('aria-checked', 'true');
+      checkboxContainer.setAttribute('title', 'Deselect post');
+      postTile.classList.add('instabulk-post-selected');
+    } else {
+      this.selectedPosts.delete(postId);
+      circle?.classList.remove('checked');
+      checkboxContainer.setAttribute('aria-checked', 'false');
+      checkboxContainer.setAttribute('title', 'Select post');
+      postTile.classList.remove('instabulk-post-selected');
     }
+
+    this.updateUI();
+    this.persistSelection();
+  }
+
+  private findPostTileContainer(postLink: HTMLAnchorElement): HTMLElement {
+    // Attach directly to the postLink anchor tag. In Instagram, this is the exact
+    // square post thumbnail box, avoiding margin/grid offset from parent wrappers.
     return postLink;
   }
 
@@ -345,34 +366,32 @@ class InstagramSavedManager {
   }
 
   private restoreSelection() {
-    document.querySelectorAll('.instabulk-checkbox-container').forEach((cbContainer) => {
-      const input = cbContainer.querySelector('.instabulk-checkbox') as HTMLInputElement | null;
+    document.querySelectorAll<HTMLElement>('.instabulk-checkbox-container').forEach((cbContainer) => {
+      const postId = cbContainer.getAttribute('data-post-id') || '';
       const circle = cbContainer.querySelector('.instabulk-checkbox-circle');
-      if (!input) return;
-
-      const postId = input.getAttribute('data-post-id') || '';
-      const container = cbContainer.parentElement;
+      const tile = cbContainer.parentElement;
       const isSelected = this.selectedPosts.has(postId);
-      input.checked = isSelected;
+
+      cbContainer.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      cbContainer.setAttribute('title', isSelected ? 'Deselect post' : 'Select post');
       if (isSelected) {
         circle?.classList.add('checked');
-        container?.classList.add('instabulk-post-selected');
+        tile?.classList.add('instabulk-post-selected');
       } else {
         circle?.classList.remove('checked');
-        container?.classList.remove('instabulk-post-selected');
+        tile?.classList.remove('instabulk-post-selected');
       }
     });
   }
 
   private clearSelection() {
     this.selectedPosts.clear();
-    document.querySelectorAll('.instabulk-checkbox').forEach(cb => {
-      (cb as HTMLInputElement).checked = false;
+    document.querySelectorAll<HTMLElement>('.instabulk-checkbox-container').forEach((cbContainer) => {
+      cbContainer.setAttribute('aria-checked', 'false');
+      cbContainer.setAttribute('title', 'Select post');
+      cbContainer.querySelector('.instabulk-checkbox-circle')?.classList.remove('checked');
     });
-    document.querySelectorAll('.instabulk-checkbox-circle').forEach(circle => {
-      circle.classList.remove('checked');
-    });
-    document.querySelectorAll('.instabulk-post-selected').forEach(el => {
+    document.querySelectorAll('.instabulk-post-selected').forEach((el) => {
       el.classList.remove('instabulk-post-selected');
     });
     this.updateUI();
@@ -401,10 +420,10 @@ class InstagramSavedManager {
             completed++;
             this.selectedPosts.delete(postId);
             this.persistSelection();
-            const checkbox = document.querySelector(`.instabulk-checkbox[data-post-id="${postId}"]`);
-            const container = checkbox?.closest('.instabulk-checkbox-container')?.parentElement;
+            const checkboxContainer = document.querySelector(`.instabulk-checkbox-container[data-post-id="${postId}"]`);
+            const container = checkboxContainer?.parentElement;
             container?.classList.remove('instabulk-post-selected');
-            checkbox?.closest('.instabulk-checkbox-container')?.remove();
+            checkboxContainer?.remove();
           } else {
             failed++;
           }
