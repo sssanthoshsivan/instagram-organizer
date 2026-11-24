@@ -40,7 +40,8 @@ const Popup = () => {
       }
 
       chrome.storage.local.get(['bulkMode', 'instagramUserId'], (result) => {
-        setIsBulkMode(!!result.bulkMode);
+        const bulkModeActive = result.bulkMode !== false;
+        setIsBulkMode(bulkModeActive);
 
         if (typeof result.instagramUserId === 'string') {
           setInstagramUserId(result.instagramUserId);
