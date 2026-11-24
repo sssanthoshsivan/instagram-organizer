@@ -190,6 +190,22 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* Close (X) button on the toolbar */
+.dock-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.dock-close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+}
+
 /* Post Tile Checkbox Injection */
 .instabulk-checkbox-container {
   position: absolute !important;

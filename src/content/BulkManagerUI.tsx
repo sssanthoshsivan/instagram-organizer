@@ -11,6 +11,7 @@ const BulkManagerUI: React.FC<Props> = ({ selectedCount: initialCount, onClear, 
   const [count, setCount] = useState(initialCount);
   const [status, setStatus] = useState<'idle' | 'processing' | 'done'>('idle');
   const [progress, setProgress] = useState(0);
+  const [showToolbar, setShowToolbar] = useState(true);
 
   useEffect(() => {
     const handleSelectionChange = (e: CustomEvent<{ count: number }>) => {
@@ -30,12 +31,21 @@ const BulkManagerUI: React.FC<Props> = ({ selectedCount: initialCount, onClear, 
     };
   }, []);
 
+  // Re-open the toolbar whenever a new selection is made
+  useEffect(() => {
+    if (count > 0 && !showToolbar) {
+      setShowToolbar(true);
+    }
+  }, [count, showToolbar]);
+
   const handleUnsave = () => {
     if (count === 0 || status === 'processing') return;
     window.dispatchEvent(new CustomEvent('instabulk-action-unsave'));
   };
 
-  const showToolbar = count > 0 || status !== 'idle';
+  const handleClose = () => {
+    setShowToolbar(false);
+  };
 
   return (
     <div className={`instabulk-dock-wrapper ${showToolbar ? 'visible' : ''}`}>
@@ -113,6 +123,21 @@ const BulkManagerUI: React.FC<Props> = ({ selectedCount: initialCount, onClear, 
             <span>Unsave ({count})</span>
           </button>
         </div>
+
+        {/* Close button */}
+        {showToolbar && (
+          <button
+            type="button"
+            className="dock-btn dock-btn-ghost dock-close-btn"
+            onClick={handleClose}
+            title="Close bulk manager toolbar"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
