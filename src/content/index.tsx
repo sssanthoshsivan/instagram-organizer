@@ -43,6 +43,16 @@ class InstagramSavedManager {
       }
     });
 
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.bulkMode !== undefined) {
+        const newActive = !!changes.bulkMode.newValue;
+        this.bulkModeEnabled = newActive;
+        if (this.isOnSavedPage()) {
+          this.setBulkMode(newActive);
+        }
+      }
+    });
+
     // Monitor URL changes (Instagram is a SPA)
     this.watchForNavigation();
   }
@@ -97,10 +107,6 @@ class InstagramSavedManager {
   private setBulkMode(active: boolean) {
     // Prevent activation if not on saved page
     if (active && !this.isOnSavedPage()) {
-      console.warn('InstaBulk: Cannot enable bulk mode - not on saved page');
-      this.showNotification('Please navigate to your saved posts first');
-      chrome.storage.local.set({ bulkMode: false });
-      this.bulkModeEnabled = false;
       return;
     }
 
@@ -124,30 +130,12 @@ class InstagramSavedManager {
     const toast = document.createElement('div');
     toast.className = 'instabulk-toast';
     toast.textContent = message;
-    toast.style.cssText = `
-      position: fixed;
-      top: 60px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #262626;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 99px;
-      z-index: 10000;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.1);
-      transition: all 0.3s ease;
-    `;
-    
     document.body.appendChild(toast);
     
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateX(-50%) translateY(-20px)';
-      setTimeout(() => toast.remove(), 300);
+      toast.style.transform = 'translateX(-50%) translateY(-10px)';
+      setTimeout(() => toast.remove(), 250);
     }, 3000);
   }
 
@@ -163,6 +151,9 @@ class InstagramSavedManager {
   private disableBulkFeatures() {
     console.log('InstaBulk: Disabling Bulk Mode');
     document.body.classList.remove('instabulk-active');
+    document.querySelectorAll('.instabulk-post-selected').forEach(el => {
+      el.classList.remove('instabulk-post-selected');
+    });
     this.selectedPosts.clear();
     this.persistSelection();
     this.removeCheckboxes();
@@ -196,8 +187,8 @@ class InstagramSavedManager {
   private scanAndInjectCheckboxes() {
     if (!this.isOnSavedPage() || !this.active) return;
 
-    // Target the main content area where posts are listed
-    const mainContent = document.querySelector('main');
+    // Target the main content area where posts are listed, or fallback to [role="main"] or body
+    const mainContent = document.querySelector('main') || document.querySelector('[role="main"]') || document.body;
     if (!mainContent) return;
 
     // Instagram uses different structures for Posts and Reels.
@@ -207,7 +198,7 @@ class InstagramSavedManager {
     
     postLinks.forEach((postLink) => {
       const container = this.findPostTileContainer(postLink as HTMLAnchorElement, mainContent);
-      if (!container || container === mainContent) return;
+      if (!container) return;
 
       // Skip if we already added a checkbox to this container
       if (container.querySelector('.instabulk-checkbox-container')) return;
@@ -228,14 +219,20 @@ class InstagramSavedManager {
       checkbox.type = 'checkbox';
       checkbox.className = 'instabulk-checkbox';
       checkbox.setAttribute('data-post-id', postId);
-      checkbox.checked = this.selectedPosts.has(postId);
+      const isSelected = this.selectedPosts.has(postId);
+      checkbox.checked = isSelected;
+      if (isSelected) {
+        container.classList.add('instabulk-post-selected');
+      }
 
       checkbox.addEventListener('change', (e) => {
         const target = e.target as HTMLInputElement;
         if (target.checked) {
           this.selectedPosts.add(postId);
+          container.classList.add('instabulk-post-selected');
         } else {
           this.selectedPosts.delete(postId);
+          container.classList.remove('instabulk-post-selected');
         }
         this.updateUI();
         this.persistSelection();
@@ -254,7 +251,7 @@ class InstagramSavedManager {
     let current: HTMLElement | null = postLink;
     let candidate: HTMLElement | null = postLink;
 
-    while (current?.parentElement && current.parentElement !== mainContent) {
+    while (current?.parentElement && current.parentElement !== mainContent && current.parentElement !== document.body) {
       const parent = current.parentElement as HTMLElement;
       const siblingPostCount = parent.querySelectorAll(postSelector).length;
 
@@ -266,6 +263,10 @@ class InstagramSavedManager {
 
       candidate = parent;
       current = parent;
+    }
+
+    if (candidate && candidate.offsetHeight === 0 && postLink.offsetHeight > 0) {
+      return postLink;
     }
 
     return candidate;
@@ -288,13 +289,22 @@ class InstagramSavedManager {
       childList: true,
       subtree: true
     });
+
+    window.addEventListener('scroll', this.handleScrollScan, { passive: true });
   }
+
+  private handleScrollScan = () => {
+    if (this.active && this.isOnSavedPage()) {
+      this.scanAndInjectCheckboxes();
+    }
+  };
 
   private stopObserver() {
     if (this.observer) {
       this.observer.disconnect();
       this.observer = null;
     }
+    window.removeEventListener('scroll', this.handleScrollScan);
   }
 
   private persistSelection() {
@@ -305,8 +315,12 @@ class InstagramSavedManager {
     document.querySelectorAll('.instabulk-checkbox').forEach((cb) => {
       const input = cb as HTMLInputElement;
       const postId = input.getAttribute('data-post-id') || '';
+      const container = input.closest('.instabulk-checkbox-container')?.parentElement;
       if (this.selectedPosts.has(postId)) {
         input.checked = true;
+        container?.classList.add('instabulk-post-selected');
+      } else {
+        container?.classList.remove('instabulk-post-selected');
       }
     });
   }
@@ -315,6 +329,9 @@ class InstagramSavedManager {
     this.selectedPosts.clear();
     document.querySelectorAll('.instabulk-checkbox').forEach(cb => {
       (cb as HTMLInputElement).checked = false;
+    });
+    document.querySelectorAll('.instabulk-post-selected').forEach(el => {
+      el.classList.remove('instabulk-post-selected');
     });
     this.updateUI();
     this.persistSelection();
@@ -343,6 +360,8 @@ class InstagramSavedManager {
             this.selectedPosts.delete(postId);
             this.persistSelection();
             const checkbox = document.querySelector(`.instabulk-checkbox[data-post-id="${postId}"]`);
+            const container = checkbox?.closest('.instabulk-checkbox-container')?.parentElement;
+            container?.classList.remove('instabulk-post-selected');
             checkbox?.closest('.instabulk-checkbox-container')?.remove();
           } else {
             failed++;

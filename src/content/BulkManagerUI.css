@@ -1,135 +1,276 @@
+/* InstaBulk Floating Action Dock */
+.instabulk-dock-wrapper,
 .instabulk-toolbar {
   position: fixed;
-  bottom: -100px;
+  bottom: -90px;
   left: 50%;
   transform: translateX(-50%);
-  width: min(90%, 650px);
   z-index: 2147483647;
-  transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-  display: flex;
-  justify-content: center;
+  transition: bottom 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+  opacity: 0;
+  pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+.instabulk-dock-wrapper.visible,
 .instabulk-toolbar.visible {
   bottom: 24px;
+  opacity: 1;
+  pointer-events: auto;
 }
 
+.instabulk-dock,
 .toolbar-inner {
-  background: rgba(18, 18, 18, 0.95);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-  border-radius: 20px;
-  padding: 12px 24px;
+  background: rgba(16, 18, 23, 0.94);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  padding: 8px 14px 8px 18px;
   display: flex;
   align-items: center;
-  gap: 24px;
-  width: 100%;
+  gap: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
-.selection-stats {
+/* Sections */
+.dock-section {
   display: flex;
   align-items: center;
-  gap: 12px;
-  color: #fff;
+  gap: 10px;
+}
+
+/* Selection Info */
+.selection-badge {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.count-num {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.count-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.count-badge {
-  background: linear-gradient(45deg, #f09433 0%, #bc1888 100%);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 99px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  box-shadow: 0 0 15px rgba(188, 24, 136, 0.4);
-}
-
-.action-buttons {
-  flex: 1;
+/* Progress bar inside dock */
+.progress-group {
   display: flex;
+  align-items: center;
   gap: 10px;
-  justify-content: flex-end;
+  padding: 0 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.toolbar-btn {
-  padding: 8px 16px;
-  border-radius: 10px;
+.dock-progress-track {
+  width: 120px;
+  height: 6px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  position: relative;
+}
+
+.dock-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff3355, #ff6b81);
+  border-radius: 9999px;
+  transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dock-progress-text {
+  font-size: 12px;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.85);
+  min-width: 32px;
+}
+
+/* Done Badge inside dock */
+.done-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #10b981;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0 8px;
+}
+
+/* Action Buttons */
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dock-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 9999px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   white-space: nowrap;
+  transition: transform 90ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              background 150ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              opacity 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.toolbar-btn.primary {
-  background: #dc2743;
-  color: white;
+@media (hover: hover) and (pointer: fine) {
+  .dock-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
 }
 
-.toolbar-btn.secondary {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+.dock-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.985);
 }
 
-.toolbar-btn.accent {
-  background: #0095f6;
-  color: white;
+.dock-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
-.toolbar-btn:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.1);
+.dock-btn-primary {
+  background: #ff3355;
+  color: #ffffff;
+  box-shadow: 0 2px 10px rgba(255, 51, 85, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
-.toolbar-btn:active {
-  transform: translateY(0);
+.dock-btn-primary:hover:not(:disabled) {
+  background: #ff4767;
+  box-shadow: 0 4px 14px rgba(255, 51, 85, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-.progress-container {
-  flex: 1;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 10px;
+.dock-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f0f2f5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.dock-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dock-btn-ghost {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.dock-btn-ghost:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Post Tile Checkbox Injection */
+.instabulk-checkbox-container {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  z-index: 99999 !important;
+  width: 26px !important;
+  height: 26px !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.instabulk-checkbox {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  border-radius: 50% !important;
+  background-color: rgba(12, 14, 18, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 2px solid #ffffff !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+  position: relative !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease !important;
+}
+
+.instabulk-checkbox:hover {
+  transform: scale(1.1) !important;
+  background-color: rgba(12, 14, 18, 0.95) !important;
+  border-color: #ffffff !important;
+}
+
+.instabulk-checkbox:checked {
+  background-color: #ff3355 !important;
+  border-color: #ff3355 !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 2px 12px rgba(255, 51, 85, 0.55) !important;
+}
+
+.instabulk-checkbox:checked::after {
+  content: '✓' !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  display: block !important;
+  text-align: center !important;
+}
+
+/* Selected Post Tile Visual Highlighting */
+.instabulk-post-selected {
+  outline: 3px solid #ff3355 !important;
+  outline-offset: -3px !important;
   position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: outline 0.15s ease;
 }
 
-.progress-bar {
+.instabulk-post-selected::after {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: linear-gradient(90deg, #f09433, #bc1888);
-  transition: width 0.3s ease;
-  z-index: 1;
+  inset: 0;
+  background: rgba(255, 51, 85, 0.08);
+  pointer-events: none;
+  z-index: 10;
 }
 
-.progress-text {
-  position: relative;
-  z-index: 2;
-  color: white;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-}
-
-.success-message {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: #00f695;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
+/* Processing Fullscreen Modal Overlay */
 .instabulk-processing-overlay {
   position: fixed;
   inset: 0;
@@ -138,48 +279,65 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: #05070b;
-  backdrop-filter: blur(32px);
+  background: rgba(8, 10, 14, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.instabulk-processing-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .instabulk-processing-card {
-  width: min(100%, 420px);
-  padding: 28px;
-  border-radius: 24px;
+  width: min(100%, 380px);
+  padding: 32px 24px;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(18, 18, 18, 0.9);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  background: #14161d;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
   text-align: center;
-  color: #fff;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
 }
 
 .instabulk-processing-spinner {
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 16px;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 18px;
   border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.16);
-  border-top-color: #dc2743;
-  animation: instabulk-spin 0.9s linear infinite;
+  border: 3px solid rgba(255, 255, 255, 0.12);
+  border-top-color: #ff3355;
+  animation: instabulk-spin 0.85s linear infinite;
 }
 
 .instabulk-processing-title {
-  font-size: 1.05rem;
+  font-size: 16px;
   font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
 }
 
 .instabulk-processing-subtitle {
   margin-top: 8px;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .instabulk-processing-counter {
-  margin-top: 16px;
-  color: #f8b4bf;
+  margin-top: 20px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ff6b81;
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 @keyframes instabulk-spin {
@@ -188,44 +346,22 @@
   }
 }
 
-/* Checkbox overlay styles */
-.instabulk-checkbox-container {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 999;
-  width: 24px;
-  height: 24px;
-}
-
-.instabulk-checkbox {
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.4);
-  border: 2px solid white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.instabulk-checkbox:checked {
-  background: var(--primary-gradient, linear-gradient(45deg, #f09433, #bc1888));
-  border-color: transparent;
-}
-
-.instabulk-checkbox:checked::after {
-  content: '✓';
-  color: white;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.instabulk-checkbox:hover {
-  transform: scale(1.1);
-  background: rgba(0, 0, 0, 0.6);
+/* Toast Notifications */
+.instabulk-toast {
+  position: fixed;
+  top: 64px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #14161d;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
 }

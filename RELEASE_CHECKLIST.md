@@ -12,7 +12,7 @@
 - [ ] `tsc -b` type-checks with no errors (the `build` script runs it first).
 - [ ] `eslint .` passes (or is configured to allow baseline errors).
 - [ ] No `console.log` statements left in production (content/popup/background).
-- [ ] `manifest.json` `version` matches `package.json` `version` (currently mismatch: `1.0.0` vs `0.0.0`).
+- [x] `manifest.json` `version` matches `package.json` `version` (both `1.0.0`).
 - [ ] Version bumped per semver (1.0.0 → 1.0.x for minor patches, 1.x.0 for features).
 - [ ] `dist/` is a clean build artifact (delete and rebuild before packaging).
 
@@ -76,7 +76,8 @@ The following **manual QA** steps must be passed on a live Instagram account bef
 
 Chrome Web Store requires these, but they are **not** in the repo yet:
 
-- [ ] **Icon**: valid 128×128 PNG (plus 48 and 16 variants) — currently invalid JPEG payloads.
+- [x] **Icon**: valid 128×128 PNG (plus 48 and 16 variants) — already present and
+      valid (PNG, 16/48/128).
 - [ ] **Promo icon / screenshot(s)**: UI screenshots showing the toolbar + a selected post.
 - [ ] **Store description**: use `manifest.json` `description`, plus a longer marketing description
        (this is what the user sees in the store).
@@ -87,15 +88,12 @@ Chrome Web Store requires these, but they are **not** in the repo yet:
 
 ---
 
-## 6. Icons — Current Defect
+## 6. Icons — Verified
 
-The three `icons/icon*.png` files currently contain JPEG payloads (`FFD8FFDB` header) despite the
-`.png` extension and being listed in the manifest as icons. Chrome will refuse to load them, so:
+Icons are valid PNGs (16×16, 48×48, 128×128). No defect to fix.
 
-- [ ] Delete the three placeholder JPEG files.
-- [ ] Generate real PNG icons (16, 48, 128) — source from an SVG preferred, PNG rendered from it.
-- [ ] Verify with a tool: header bytes `89 50 4E 47` for PNG, or open the extension and check the
-       toolbar icon renders.
+- [x] `icons/icon16.png`, `icon48.png`, `icon128.png` are valid PNGs (header check).
+- [x] Referenced by `manifest.json` `action.default_icon` and `icons`.
 
 ---
 
@@ -131,8 +129,16 @@ Only after every item above is checked:
 
 ---
 
-## Immediate Next Step
+## Immediate Next Steps (for the team)
 
-1. Resolve the 4 blockers in Phase 0 (restore source, install deps, fix icons, clean dist).
-2. Create `feature/restore-core` and get `npm run build` green.
-3. Report back to the user for approval before merging anything.
+1. Generate store screenshots + a longer store description (write `STORE_DESCRIPTION.md`).
+2. Write the privacy-policy page URL (minimal policy statement).
+3. Optional: remove the unused `scripting` permission.
+4. Re-run `npm run build` + `npm test` (green) before packaging.
+5. Tag the release and submit to the Chrome Web Store.
+
+## Branch Policy
+
+- All work happens on `feature/...` branches.
+- **Nothing is merged to `main` and nothing is published to the Chrome Web Store
+  without the user's explicit approval.**
