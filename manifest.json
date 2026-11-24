@@ -5,8 +5,7 @@
   "description": "Bulk manage your Instagram saved posts with ease. Select, unsave, or move posts to collections efficiently.",
   "permissions": [
     "storage",
-    "activeTab",
-    "scripting"
+    "activeTab"
   ],
   "action": {
     "default_popup": "index.html",
