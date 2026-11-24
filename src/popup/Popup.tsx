@@ -132,7 +132,7 @@ const Popup = () => {
             </svg>
           </div>
           <div className="brand-text">
-            <div className="brand-title">InstaBulk</div>
+            <div className="brand-title">Savedly</div>
             <div className="brand-subtitle">Saved Organizer</div>
           </div>
         </div>

@@ -1,8 +1,8 @@
-# Privacy Policy for InstaBulk: Saved Posts Manager
+# Privacy Policy for Savedly: Saved Posts Manager for Instagram
 
 **Last Updated**: November 24, 2026
 
-**InstaBulk: Saved Posts Manager** ("the extension") is committed to respecting and protecting your privacy. This Privacy Policy explains how information is handled by the extension.
+**Savedly: Saved Posts Manager for Instagram** ("the extension") is committed to respecting and protecting your privacy. This Privacy Policy explains how information is handled by the extension.
 
 ---
 

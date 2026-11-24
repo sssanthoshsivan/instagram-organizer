@@ -8,7 +8,7 @@ Use this document to copy and paste directly into the **Chrome Web Store Develop
 
 ### Extension Name
 ```text
-InstaBulk: Saved Posts Manager
+Savedly: Saved Posts Manager for Instagram
 ```
 
 ### Short Description (≤ 132 characters)
@@ -31,9 +31,9 @@ Public
 ## 2. Detailed Description (Paste into Store Listing)
 
 ```markdown
-Take control of your saved posts on Instagram with InstaBulk — the clean, Apple-inspired bulk manager for Instagram.
+Take control of your saved posts on Instagram with Savedly — the clean, Apple-inspired bulk manager for Instagram.
 
-Tired of opening every single saved post one by one just to unsave it? InstaBulk adds intuitive, one-click selection circles directly on your saved post thumbnails and gives you a floating action dock to batch-unsave posts effortlessly.
+Tired of opening every single saved post one by one just to unsave it? Savedly adds intuitive, one-click selection circles directly on your saved post thumbnails and gives you a floating action dock to batch-unsave posts effortlessly.
 
 ✨ Key Features:
 • One-Click Selection: Select multiple saved posts and reels directly from your grid.
@@ -46,10 +46,10 @@ Tired of opening every single saved post one by one just to unsave it? InstaBulk
 🚀 How to Use:
 1. Enter your Instagram handle in the extension popup and click "Go to Saved Posts" (or navigate directly to instagram.com/your_username/saved/all-posts/).
 2. Click the selection circles on the posts you wish to remove.
-3. Click "Unsave" on the floating bottom dock and let InstaBulk handle the rest!
+3. Click "Unsave" on the floating bottom dock and let Savedly handle the rest!
 
 🔒 Privacy First:
-InstaBulk runs completely locally in your browser. We never collect, track, or transmit your personal data, credentials, or browsing history.
+Savedly runs completely locally in your browser. We never collect, track, or transmit your personal data, credentials, or browsing history.
 
 Need support or want to request a feature? Check out our GitHub repository:
 https://github.com/sssanthoshsivan/instagram-organizer
@@ -89,4 +89,4 @@ https://github.com/sssanthoshsivan/instagram-organizer/blob/main/PRIVACY_POLICY.
 
 - [x] **Store Icon**: `icons/icon128.png` (128×128 PNG)
 - [ ] **Screenshots**: At least 1 screenshot (1280×800 or 640×400) showing the selection circles on Instagram saved posts and the floating bottom action dock.
-- [x] **ZIP Package**: `instabulk-v1.0.0.zip` ready to upload.
+- [x] **ZIP Package**: `savedly-v1.0.0.zip` ready to upload.

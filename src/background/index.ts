@@ -1,8 +1,8 @@
-// Background service worker for InstaBulk
-console.log('InstaBulk: Background Worker Started');
+// Background service worker for Savedly
+console.log('Savedly: Background Worker Started');
 
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('InstaBulk: Extension Installed');
+  console.log('Savedly: Extension Installed');
   chrome.storage.local.set({ bulkMode: true });
 });
 

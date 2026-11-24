@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "InstaBulk: Saved Posts Manager",
+  "name": "Savedly: Saved Posts Manager for Instagram",
   "version": "1.0.0",
   "description": "Bulk manage your Instagram saved posts with ease. Select, unsave, or move posts to collections efficiently.",
   "permissions": [

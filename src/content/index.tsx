@@ -16,11 +16,11 @@ class InstagramSavedManager {
   }
 
   private init() {
-    console.log('InstaBulk: Content Script Loaded');
+    console.log('Savedly: Content Script Loaded');
     
     // CRITICAL: Only run on saved posts page
     if (!this.isOnSavedPage()) {
-      console.log('InstaBulk: Not on saved page, extension inactive');
+      console.log('Savedly: Not on saved page, extension inactive');
     }
     
     chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
@@ -79,12 +79,12 @@ class InstagramSavedManager {
       const currentUrl = window.location.href;
       if (currentUrl !== lastUrl) {
         lastUrl = currentUrl;
-        console.log('InstaBulk: URL changed to', currentUrl);
+        console.log('Savedly: URL changed to', currentUrl);
         
         // If we navigate away from saved page, disable the injected UI but
         // keep the user's bulk-mode preference so it can be restored later.
         if (!this.isOnSavedPage() && this.active) {
-          console.log('InstaBulk: Left saved page, disabling features');
+          console.log('Savedly: Left saved page, disabling features');
           this.setBulkMode(false);
           // Also clear selected posts when navigating away
           this.selectedPosts.clear();
@@ -95,7 +95,7 @@ class InstagramSavedManager {
         // Instagram is a SPA, so when returning to the saved page we need to
         // restore bulk mode without requiring a full refresh.
         if (this.isOnSavedPage() && this.bulkModeEnabled && !this.active) {
-          console.log('InstaBulk: Returned to saved page, restoring bulk mode');
+          console.log('Savedly: Returned to saved page, restoring bulk mode');
           this.setBulkMode(true);
         }
       }
@@ -154,7 +154,7 @@ class InstagramSavedManager {
   }
 
   private enableBulkFeatures() {
-    console.log('InstaBulk: Enabling Bulk Mode');
+    console.log('Savedly: Enabling Bulk Mode');
     document.body.classList.add('instabulk-active');
     this.injectUI();
     this.scanAndInjectCheckboxes();
@@ -173,7 +173,7 @@ class InstagramSavedManager {
   }
 
   private disableBulkFeatures() {
-    console.log('InstaBulk: Disabling Bulk Mode');
+    console.log('Savedly: Disabling Bulk Mode');
     document.body.classList.remove('instabulk-active');
     document.querySelectorAll('.instabulk-post-selected').forEach(el => {
       el.classList.remove('instabulk-post-selected');
@@ -399,7 +399,7 @@ class InstagramSavedManager {
   }
 
   public async startUnsave() {
-    console.log(`InstaBulk: Starting Bulk Unsave for ${this.selectedPosts.size} posts`);
+    console.log(`Savedly: Starting Bulk Unsave for ${this.selectedPosts.size} posts`);
     this.showProcessingOverlay();
     this.broadcastStatus('processing', 0);
 
@@ -410,7 +410,7 @@ class InstagramSavedManager {
     try {
       for (const postId of postIds) {
         if (!this.active || !this.isOnSavedPage()) {
-          console.log('InstaBulk: Stop condition met (inactive or wrong page)');
+          console.log('Savedly: Stop condition met (inactive or wrong page)');
           break;
         }
 
@@ -428,7 +428,7 @@ class InstagramSavedManager {
             failed++;
           }
         } catch (err) {
-          console.error('InstaBulk: Error in loop', postId, err);
+          console.error('Savedly: Error in loop', postId, err);
           failed++;
         }
 
