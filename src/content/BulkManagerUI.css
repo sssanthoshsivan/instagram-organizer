@@ -104,11 +104,36 @@
 .done-group {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: #10b981;
   font-size: 13px;
   font-weight: 600;
-  padding: 0 8px;
+  padding: 0 4px;
+}
+
+.done-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+}
+
+.done-badge svg {
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2.5 !important;
+}
+
+.done-text {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 /* Action Buttons */
@@ -190,20 +215,69 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* Close (X) button on the toolbar */
-.dock-close-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.45);
-  transition: color 150ms ease, background 150ms ease;
+/* Toolbar Divider */
+.dock-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.14);
+  margin: 0 2px;
+  flex-shrink: 0;
 }
 
-.dock-close-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.14);
+/* Dedicated Close (X) button on the toolbar */
+.dock-close-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  flex-shrink: 0 !important;
+  transition: background 150ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              color 150ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              border-color 150ms cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 90ms cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dock-close-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+    transform: scale(1.06) !important;
+  }
+}
+
+.dock-close-btn:active:not(:disabled) {
+  transform: scale(0.94) !important;
+}
+
+.dock-close-btn:disabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed !important;
+}
+
+.dock-close-btn svg {
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  min-height: 14px !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2.2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  display: block !important;
+  pointer-events: none !important;
 }
 
 /* Post Tile Checkbox Injection */

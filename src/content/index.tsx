@@ -173,6 +173,7 @@ class InstagramSavedManager {
         <BulkManagerUI
           selectedCount={this.selectedPosts.size}
           onClear={() => this.clearSelection()}
+          onClose={() => this.clearSelection()}
           onMoveToCollection={() => this.showNotification('Move to Collection is not available yet — it is on our roadmap.')}
         />
       </React.StrictMode>
@@ -379,7 +380,7 @@ class InstagramSavedManager {
       this.hideProcessingOverlay();
     }
 
-    this.broadcastStatus('done', 100);
+    this.broadcastStatus('done', 100, completed, failed);
     this.updateUI();
   }
 
@@ -546,8 +547,8 @@ class InstagramSavedManager {
     this.mutedMedia = [];
   }
 
-  private broadcastStatus(status: 'idle' | 'processing' | 'done', progress: number) {
-    window.dispatchEvent(new CustomEvent('instabulk-status-update', { detail: { status, progress } }));
+  private broadcastStatus(status: 'idle' | 'processing' | 'done', progress: number, completed?: number, failed?: number) {
+    window.dispatchEvent(new CustomEvent('instabulk-status-update', { detail: { status, progress, completed, failed } }));
   }
 
   private updateUI() {
